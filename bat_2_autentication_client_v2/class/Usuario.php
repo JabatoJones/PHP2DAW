@@ -71,16 +71,16 @@ class Usuario {
 
     /*public function persist($dbh) {
         if($this->id){ //UPDATE
-            $modificar = "UPDATE usuario SET nombre= :nombre ,pass= :pass,correo= :correo ,idpintor= :pintor WHERE id= :id";
+            $modificar = "UPDATE usuario SET nombre= :nombre ,pass= :pass,correo= :correo ,idPintor= :pintor WHERE id= :id";
             $persistir = $dbh->prepare($modificar);
-            $persistido = $persistir->execute(array(":usuario" => $this->nombre,":pass" => $this->pass,":correo" => $this->correo,":idpintor" => $this->pintor, ":id" => $this->id)); 
+            $persistido = $persistir->execute(array(":usuario" => $this->nombre,":pass" => $this->pass,":correo" => $this->correo,":idPintor" => $this->pintor, ":id" => $this->id)); 
         }else{   ////INSERT         
-            $query = "INSERT INTO usuario (nombre, idpintor ,pass ,correo) values (:nombre, :idpintor, :pass, :correo)";
+            $query = "INSERT INTO usuario (nombre, idPintor ,pass ,correo) values (:nombre, :idPintor, :pass, :correo)";
             $persistir = $dbh->prepare($query);
          
             //$dbh->prepare($query);
             $persistido = $persistir->execute([":nombre"=> $this->getNombre(),
-                                                ":idpintor"=> $this->getPintor(),
+                                                ":idPintor"=> $this->getPintor(),
                                                 ":pass"=> $this->getPass(),
                                                 ":correo"=> $this->getCorreo()]);   
             if($persistido){
