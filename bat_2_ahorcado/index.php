@@ -93,26 +93,25 @@ if (empty($_POST)) {
 } elseif (isset($_POST['partidas'])) {
     $_SESSION['partidas'] = Partida::getAllPartidas($dbh, $_SESSION['user']->getId());
     include './views/partidas.php';
-} elseif (isset ($_POST['XML'])) {
+} elseif (isset($_POST['XML'])) {
     $id = $_POST['XML'];
     $partida = Partida::getPartidaById($dbh, $_POST['XML']);
     $_SESSION['partida'] = $partida;
-    $pruebaXml ="<idPartida></idPartida>";
-$miPartida = new SimpleXMLElement($pruebaXml);//Crea un nuevo objeto SimpleXMLElement
-        $miPartida->addAttribute('id', $_SESSION['partida']->getId());//Añade un elemento hijo al nodo XML
-        
-        
-        while( $jugada = $partida->getJugadas()->iterate()){
-            $jugadas = $miPartida->addChild('Jugada');
-            $jugadas->addAttribute('id',$jugada->getId());
-            $acierto = $jugadas->addChild('PalabraEncontrada', $jugada->getSolucionada());
-            $acierto = $jugadas->addChild('Letra',$jugada->getLetra());
-        }
-        $_SESSION['xml'] = $miPartida->asXML();
-        $miFichero = $miPartida->asXML();//Retorna un string XML correcto basado en un elemento SimpleXML
-        $miArchivo = fopen("xml/miPartida.xml", "w+");//Abre un fichero o un URL
-        fwrite($miArchivo, $miFichero);//Escritura archivo
-        include './views/xml.php';
+    $pruebaXml = "<idPartida></idPartida>";
+    $miPartida = new SimpleXMLElement($pruebaXml); //Crea un nuevo objeto SimpleXMLElement
+    $miPartida->addAttribute('id', $_SESSION['partida']->getId()); //Añade un elemento hijo al nodo XML
+    
+    while ($jugada = $partida->getJugadas()->iterate()) {
+        $jugadas = $miPartida->addChild('Jugada');
+        $jugadas->addAttribute('idJugada', $jugada->getId());
+        $acierto = $jugadas->addChild('Solucion', $jugada->getSolucionada());
+        $acierto = $jugadas->addChild('Letra', $jugada->getLetra());
+    }
+    $_SESSION['xml'] = $miPartida->asXML();
+    $miFichero = $miPartida->asXML(); //Retorna un string XML correcto basado en un elemento SimpleXML
+    $miArchivo = fopen("xml/miPartida.xml", "w+"); //Abre un fichero o un URL
+    fwrite($miArchivo, $miFichero); //Escritura archivo
+    include './views/xml.php';
 }
 
 //Elimina la conexion
