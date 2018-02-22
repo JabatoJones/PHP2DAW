@@ -11,7 +11,6 @@ require_once 'Collection.php';
  */
 class Partida {
 
-    private $idUsuario;
     private $estado;
     private $intentos;
     private $jugadas;
@@ -19,6 +18,7 @@ class Partida {
     private $solucionada;
     private $fallos;
     private $id;
+    private $idUsuario;
 
     function __construct() {
         $this->estado = 'false';
@@ -26,25 +26,13 @@ class Partida {
         $this->fallos = 0;
         $this->jugadas = new Collection();
         $this->palabra = $this->randomWord();
-        $this->solucionada = '';
+        $this->solucionada = array_fill(0, strlen($this->palabra), '_');
     }
 
     function randomWord() {
         $palabras = ['kase0', 'sharif', 'arkano', 'nach', 'duki', 'shotta', 'tote', 'capaz'];
         return $palabras[rand(0, 7)];
         rand(0, 9);
-    }
-
-    function isCorrectLetter($letra) {
-        $correct = false;
-        for ($index = 0; $index < strlen($this->getPalabra()); $index++) {
-            if ($letra == $this->getPalabra()[$index]) {
-                $correct = true;
-                break;
-            }
-        }
-        $this->intentos++;
-        return $correct;
     }
 
     function getId() {
@@ -111,14 +99,15 @@ class Partida {
         $this->palabra = $palabra;
     }
 
-    function procesaPalabra($charSelect,$partida) {
+    function procesaPalabra($charSelect) {
+        $this->setIntentos($this->getIntentos()+1);
         $word = str_split($this->palabra);
         $encript = !isset($_SESSION['encript']) ? array_fill(0, strlen($this->palabra), '_') : $_SESSION['encript'];
         $aciertos = 0;
         $aciertosActuales = 0;
         $keys = array_keys($encript);
         $count = 0;
-        
+
         foreach ($word as $value) {
             if ($charSelect == $value) {
                 $encript[$keys[$count]] = $charSelect;
@@ -129,47 +118,47 @@ class Partida {
             if ($encript[$keys[$count]] !== '_') {
                 $aciertos++;
             }
-            $count +=1;
-        }        $partida->setSolucionada($encript);
-        //Crea una nueva jugada y la añade a la coleccion de jugadas.
-        $jugada = new Jugada($charSelect, $partida->getSolucionada());
-        if (is_string($partida->getJugadas())) {
-            $partida->jugadas = new Collection;
-            $partida->getJugadas()->add($jugada);
-        } else {
-            $partida->getJugadas()->add($jugada);
+            $count += 1;
         }
-        //$this->add($jugada);
+        $this->setSolucionada($encript);
+        //Crea una nueva jugada y la añade a la coleccion de jugadas.
+        $jugada = new Jugada($charSelect, $this->getSolucionada());
+        if (is_string($this->getJugadas())) {
+            $this->jugadas = new Collection;
+            $this->getJugadas()->add($jugada);
+        } else {
+            $this->getJugadas()->add($jugada);
+        }
         $_SESSION['encript'] = $encript;
-        $fallos = $aciertosActuales === 0 ? $partida->getFallos() + 1 : $partida->getFallos();
-        $partida->setFallos($fallos);
+        $fallos = $aciertosActuales === 0 ? $this->getFallos() + 1 : $this->getFallos();
+        $this->setFallos($fallos);
         //Retorna un array booleanos victoria/derrota.
         $win = $aciertos === count($word);
-        $lose =  $partida->getFallos() > 4;
-        $partida->setSolucionada(implode('', $encript));
-        if($win || $lose){
-            $partida->setEstado('Finalizada');
+        $lose = $this->getFallos() > 4;
+        if ($win || $lose) {
+            $this->setEstado('Finalizada');
         } else {
-            $partida->setEstado('empezada');
+            $this->setEstado('empezada');
         }
-        return [$win,$lose];
+        return $win ? $win : ($lose ? $lose : null);
     }
 
     public function persist($dbh) {
+        $this->setSolucionada(implode('', $this->getSolucionada()));
         if ($this->id) {//Mod
             $modificar = 'UPDATE partida SET idUsuario = :idUsuario, palabra = :palabra, estado= :estado, intentos= :intentos , fallos= :fallos, solucionada = :solucionada WHERE  id = :id';
             $prepare = $dbh->prepare($modificar);
-            $persistido = $prepare->execute(array(':idUsuario' => $this->getIdUsuario(), ':palabra' => $this->getPalabra(), ':estado' => $this->getEstado(), ':intentos' => $this->getIntentos() , ':fallos' => $this->getFallos(), ':solucionada' => $this->getSolucionada(), ":id" => $this->id));
+            $persistido = $prepare->execute(array(':idUsuario' => $this->getIdUsuario(), ':palabra' => $this->getPalabra(), ':estado' => $this->getEstado(), ':intentos' => $this->getIntentos(), ':fallos' => $this->getFallos(), ':solucionada' => $this->getSolucionada(), ":id" => $this->id));
             if ($persistido) {
                 $jugada = $this->getJugadas()->getLast();
                 $jugada->persist($dbh, $this->getId());
             }
         } else {//Insert
             $query = "INSERT INTO `partida`(`idUsuario`, `palabra`, `estado`, `intentos` ,`fallos` ,`solucionada`) VALUES" .
-                    "(:idUsuario, :palabra, :estado, :intentos , :fallos, solucionada = :solucionada)";
+                    "(:idUsuario, :palabra, :estado, :intentos , :fallos, :solucionada)";
             $stmt = $dbh->prepare($query);
             $persistido = $stmt->execute(array(":idUsuario" => $this->idUsuario, ":palabra" => $this->getPalabra(), ":estado" => $this->getEstado(),
-                ":intentos" => $this->getIntentos(),":fallos" => $this->getFallos(),":solucionada" => $this->getSolucionada()));
+                ":intentos" => $this->getIntentos(), ":fallos" => $this->getFallos(), ":solucionada" => $this->getSolucionada()));
             if ($persistido) {
                 $this->setId($dbh->lastInsertId());
                 $jugada = $this->getJugadas()->getLast();
@@ -196,10 +185,10 @@ class Partida {
         $partida = $prepare->fetch();
         if ($partida) {
             //Recupera todas las partidas de la base de datos mediante el ID
-            
+
             $jugadas = Jugada::getJugadasByIdPartida($dbh, $partida->getId());
             //$partida->setJugadas = $jugadas;
-            foreach ($jugadas as $jugada){
+            foreach ($jugadas as $jugada) {
                 //Añade partidas a la coleccion del usuario.
                 $partida->jugadas->add($jugada);
             }

@@ -8,6 +8,11 @@ require_once 'class/Jugada.php';
 $dbh = BD::getConexion();
 session_start();
 if (empty($_POST)) {
+    $_SESSION['partida'] = null;
+    $_SESSION['encript'] = null;
+    $_SESSION['jugadas'] = null;
+    session_unset();
+    session_destroy();
     include './views/login.php';
 } elseif (isset($_POST['cancelRegister'])) {
     include './views/login.php';
@@ -55,7 +60,10 @@ if (empty($_POST)) {
         try {
             $registrado = $user->persist($dbh);
             if ($registrado) {
-                include './views/login.php';
+                $_SESSION['mensaje'] = 'Hola '.$user->getNombre();
+                $_SESSION['partidas'] = Partida::getAllPartidas($dbh, $user->getId());
+                $_SESSION['user'] = $user;
+                include './views/partidas.php';
             } else {
                 $_SESSION['mensaje'] = 'Credenciales invaldas';
                 include './views/login.php';
@@ -69,23 +77,21 @@ if (empty($_POST)) {
         include './views/juego.php';
     }
 } else if (isset($_POST['newGame'])) { //Nueva partida
+    $_SESSION['partida'] = null;
+    $_SESSION['encript'] = null;
+    $_SESSION['jugadas'] = null; 
     $partida = new Partida();
-    $_SESSION['user']->setIdPartida($partida->getId());
     $_SESSION['partida'] = $partida;
     include './views/juego.php';
 } else if (isset($_POST['jugada'])) {
     $letra = $_POST['letra'];
     $partida = $_SESSION['partida'];
     $partida->setIdUsuario($_SESSION['user']->getId());
-    $_SESSION['partida']->isCorrectLetter($letra);
-    $result = $_SESSION['partida']->procesaPalabra($letra, $partida);
-    $win = $result[0];
-    $lose = $result[1];
+    $result = $_SESSION['partida']->procesaPalabra($letra);
     $partida->persist($dbh);
-    //$partida->getJugadas()->persist($dbh,$partida->getId());
-    if ($win) {
+    if ($result == 1) {
         include './views/win.php';
-    } elseif ($lose) {
+    } elseif ($result == 2) {
         include './views/lose.php';
     } else {
         include './views/juego.php';
@@ -100,13 +106,19 @@ if (empty($_POST)) {
     $pruebaXml = "<idPartida></idPartida>";
     $miPartida = new SimpleXMLElement($pruebaXml); //Crea un nuevo objeto SimpleXMLElement
     $miPartida->addAttribute('id', $_SESSION['partida']->getId()); //Añade un elemento hijo al nodo XML
-    
+    //DEFINE DOCUMENTO XML ->new DOMDocument('1.0','UTF-8');
+    //creamos el nodo raiz -> $xml->createElement('');s
+    //appendChild
+    //formatear el xml ->$mifichero->formauoutput = true;
+
     while ($jugada = $partida->getJugadas()->iterate()) {
         $jugadas = $miPartida->addChild('Jugada');
         $jugadas->addAttribute('idJugada', $jugada->getId());
         $acierto = $jugadas->addChild('Solucion', $jugada->getSolucionada());
-        $acierto = $jugadas->addChild('Letra', $jugada->getLetra());
+        $letra = $jugadas->addChild('Letra', $jugada->getLetra());
     }
+    $miPartida->preserveWhiteSpace = true;
+    $miPartida->formatOutput = true;
     $_SESSION['xml'] = $miPartida->asXML();
     $miFichero = $miPartida->asXML(); //Retorna un string XML correcto basado en un elemento SimpleXML
     $miArchivo = fopen("xml/miPartida.xml", "w+"); //Abre un fichero o un URL

@@ -53,10 +53,16 @@ and open the template in the editor.
     </p>
     <div>
         <p><?php
-            if (isset($_SESSION['encript'])) {
-                if (count($_SESSION['encript']) >= 1) {
-                    foreach ($_SESSION['encript'] as $letra) {
-                        echo $letra;
+            
+            if (isset($_SESSION['partida'])) {
+                if ($_SESSION['partida']->getSolucionada()) {
+                    if(is_string($_SESSION['partida']->getSolucionada())){
+                        $solu = $_SESSION['partida']->getSolucionada();
+                        $arrayPalabra = str_split($solu);
+                        $_SESSION['partida']->setSolucionada($arrayPalabra);
+                    }                        
+                    foreach ($_SESSION['partida']->getSolucionada() as $letra) {
+                        echo $letra .' ';
                     }
                 }
             }

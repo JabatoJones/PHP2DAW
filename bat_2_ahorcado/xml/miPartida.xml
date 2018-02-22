@@ -1,2 +1,17 @@
 <?xml version="1.0"?>
-<idPartida id="28"><Jugada id="62"><PalabraEncontrada>a _ a a _ a</PalabraEncontrada><Letra>a</Letra></Jugada><Jugada id="63"><PalabraEncontrada>a _ a a _ a</PalabraEncontrada><Letra>c</Letra></Jugada><Jugada id="67"><PalabraEncontrada>a _ a a _ a</PalabraEncontrada><Letra>r</Letra></Jugada><Jugada id="68"><PalabraEncontrada>a _ o a _ a</PalabraEncontrada><Letra>o</Letra></Jugada><Jugada id="69"><PalabraEncontrada>a _ o a _ a</PalabraEncontrada><Letra>4</Letra></Jugada></idPartida>
+<idPartida id="60">
+    <Jugada idJugada="130">
+        <Solucion>_ _ a _ _ _</Solucion>
+        <Letra>a</Letra>
+    </Jugada>
+    <Jugada idJugada="131">
+        <Solucion>_ _ a _ _ f</Solucion>
+        <Letra>f</Letra>
+    </Jugada>
+    <Jugada idJugada="132">
+        <Solucion>s _ a _ _ f</Solucion>
+        <Letra>s</Letra>
+    </Jugada>
+    <preserveWhiteSpace>1</preserveWhiteSpace>
+    <formatOutput>1</formatOutput>
+</idPartida>
