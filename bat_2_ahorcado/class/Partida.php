@@ -177,11 +177,11 @@ class Partida {
         return $result;
     }
 
-    public static function getPartidaById($dbh, $id) {
+    public static function getPartidaById($dbh, $idUsuario) {
         $query = 'SELECT * FROM partida where id = :id';
         $prepare = $dbh->prepare($query);
         $prepare->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, "Partida");
-        $prepare->execute(array(":id" => $id));
+        $prepare->execute(array(":id" => $idUsuario));
         $partida = $prepare->fetch();
         if ($partida) {
             //Recupera todas las partidas de la base de datos mediante el ID
@@ -194,6 +194,16 @@ class Partida {
             }
             return $partida;
         }
+    }
+    
+    //Recupera todas la partidas del usuario logueado
+    public static function getPartidasByIdUser($bd, $id){
+        $query = "SELECT * FROM partida WHERE id = :id";
+        $stmt = $bd->prepare($query);
+        $stmt ->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, "Partida");
+        $stmt->execute(array(":id" => $id));
+        $miPartidas = $stmt->fetchAll();
+        return $miPartidas;
     }
 
 }

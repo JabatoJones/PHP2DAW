@@ -1,17 +1,2 @@
 <?xml version="1.0"?>
-<idPartida id="60">
-    <Jugada idJugada="130">
-        <Solucion>_ _ a _ _ _</Solucion>
-        <Letra>a</Letra>
-    </Jugada>
-    <Jugada idJugada="131">
-        <Solucion>_ _ a _ _ f</Solucion>
-        <Letra>f</Letra>
-    </Jugada>
-    <Jugada idJugada="132">
-        <Solucion>s _ a _ _ f</Solucion>
-        <Letra>s</Letra>
-    </Jugada>
-    <preserveWhiteSpace>1</preserveWhiteSpace>
-    <formatOutput>1</formatOutput>
-</idPartida>
+<idPartida id="68"><Jugada idJugada="178"><Solucion>a _ _ a _ _</Solucion><Letra>a</Letra></Jugada><preserveWhiteSpace>1</preserveWhiteSpace><formatOutput>1</formatOutput></idPartida>

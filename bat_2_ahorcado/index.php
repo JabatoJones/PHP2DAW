@@ -10,7 +10,6 @@ session_start();
 if (empty($_POST)) {
     $_SESSION['partida'] = null;
     $_SESSION['encript'] = null;
-    $_SESSION['jugadas'] = null;
     session_unset();
     session_destroy();
     include './views/login.php';
@@ -29,9 +28,9 @@ if (empty($_POST)) {
         try {
             $logado = $user->getUsuarioByCredentials($dbh, $name, $pass);
             if ($logado) {
-                $_SESSION['mensaje'] = 'Hola ' . $logado->getNombre();
+                $_SESSION['mensaje'] = 'Hola ' . $logado->getNombre();               
+                $logado->setPartidas(Partida::getAllPartidas($dbh, $logado->getId()));
                 $_SESSION['user'] = $logado;
-                $_SESSION['partidas'] = Partida::getAllPartidas($dbh, $logado->getId());
                 include './views/partidas.php';
             } else {
                 $_SESSION['mensaje'] = 'Credenciales invaldas';
@@ -61,7 +60,7 @@ if (empty($_POST)) {
             $registrado = $user->persist($dbh);
             if ($registrado) {
                 $_SESSION['mensaje'] = 'Hola '.$user->getNombre();
-                $_SESSION['partidas'] = Partida::getAllPartidas($dbh, $user->getId());
+                $user->setPartidas(Partida::getAllPartidas($dbh, $user->getId()));
                 $_SESSION['user'] = $user;
                 include './views/partidas.php';
             } else {
@@ -79,7 +78,6 @@ if (empty($_POST)) {
 } else if (isset($_POST['newGame'])) { //Nueva partida
     $_SESSION['partida'] = null;
     $_SESSION['encript'] = null;
-    $_SESSION['jugadas'] = null; 
     $partida = new Partida();
     $_SESSION['partida'] = $partida;
     include './views/juego.php';
@@ -97,7 +95,7 @@ if (empty($_POST)) {
         include './views/juego.php';
     }
 } elseif (isset($_POST['partidas'])) {
-    $_SESSION['partidas'] = Partida::getAllPartidas($dbh, $_SESSION['user']->getId());
+    $_SESSION['user']->setPartidas(Partida::getAllPartidas($dbh, $_SESSION['user']->getId()));
     include './views/partidas.php';
 } elseif (isset($_POST['XML'])) {
     $id = $_POST['XML'];
