@@ -119,7 +119,7 @@ if (empty($_POST)) {
     $miPartida->formatOutput = true;
     $_SESSION['xml'] = $miPartida->asXML();
     $miFichero = $miPartida->asXML(); //Retorna un string XML correcto basado en un elemento SimpleXML
-    $miArchivo = fopen("xml/miPartida.xml", "w+"); //Abre un fichero o un URL
+    $miArchivo = fopen("xml/movimientos.xml", "w+"); //Abre un fichero o un URL
     fwrite($miArchivo, $miFichero); //Escritura archivo
     include './views/xml.php';
 }
